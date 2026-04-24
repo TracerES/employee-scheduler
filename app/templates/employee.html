@@ -1,1 +1,94 @@
-<!DOCTYPE html><html><head><title>My Schedule</title><meta name="viewport" content="width=device-width, initial-scale=1"><link href="/static/styles.css" rel="stylesheet"></head><body><div class="container"><div class="topbar"><div><div class="brand">My Schedule</div><div class="muted-text">Welcome, {{user.name}}</div></div><div class="actions"><a class="btn" href="/employee?view=week&week={{anchor.isoformat() if view=='week' else ''}}">Week View</a><a class="btn" href="/employee?view=month&month={{anchor.strftime('%Y-%m')}}">Month View</a><a class="btn secondary" href="/logout">Logout</a></div></div><div class="grid"><div class="card"><div class="section-title">Request Leave</div><form method="post" action="/employee/leave/add"><label>Start date</label><input type="date" name="start_date" required><label>End date</label><input type="date" name="end_date" required><label>Reason</label><textarea name="reason"></textarea><button>Send Request</button></form></div><div class="card"><div class="section-title">My Leave Requests</div>{% for leave in leave_requests %}<div class="list-row">{{leave.start_date.strftime('%d %b')}} to {{leave.end_date.strftime('%d %b')}}<br>{{leave.reason}}<br><span class="badge {{leave.status}}">{{leave.status}}</span></div>{% else %}<div class="muted-text">No leave requests</div>{% endfor %}</div></div><div class="card">{% if view == 'week' %}<div class="calendar-toolbar"><a class="arrow-btn" href="/employee?view=week&week={{prev_week}}">&#8592;</a><div class="section-title">Week of {{anchor.strftime('%d %b %Y')}}</div><a class="arrow-btn" href="/employee?view=week&week={{next_week}}">&#8594;</a></div><div class="week-grid">{% for day in days %}<div class="day-card"><div class="day-title">{{day.date.strftime('%a %d %b')}}</div>{% for leave in day.leaves %}<div class="leave-pill"><b>{{leave.employee}}</b><br>Leave{% if leave.reason %}<br>{{leave.reason}}{% endif %}</div>{% endfor %}{% for shift in day.shifts %}<div class="shift-pill">{{shift.start_time}} - {{shift.end_time}}<br>{{shift.note or ''}}</div>{% endfor %}{% if not day.shifts and not day.leaves %}<div class="muted-text">No shifts</div>{% endif %}</div>{% endfor %}</div>{% else %}<div class="calendar-toolbar"><a class="arrow-btn" href="/employee?view=month&month={{prev_month}}">&#8592;</a><div class="section-title">{{anchor.strftime('%B %Y')}}</div><a class="arrow-btn" href="/employee?view=month&month={{next_month}}">&#8594;</a></div><table class="calendar"><tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>{% for week in calendar_weeks %}<tr>{% for day in week %}<td class="{% if not day.in_month %}muted{% endif %}"><div class="cell-date">{{day.date.day}}</div>{% for leave in day.leaves %}<div class="cell-leave"><b>{{leave.employee}}</b><br>Leave</div>{% endfor %}{% for shift in day.shifts %}<div class="cell-item">{{shift.start_time}} - {{shift.end_time}}<br>{{shift.note or ''}}</div>{% endfor %}</td>{% endfor %}</tr>{% endfor %}</table>{% endif %}</div></div></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Schedule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/static/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div>
+      <div class="brand">My Schedule</div>
+      <div class="muted-text">Welcome, {{user.name}}</div>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/employee?view=week&week={{anchor.isoformat() if view=='week' else ''}}">Week View</a>
+      <a class="btn" href="/employee?view=month&month={{anchor.strftime('%Y-%m')}}">Month View</a>
+      <a class="btn secondary" href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if view == 'week' %}
+    <div class="calendar-toolbar">
+      <a class="arrow-btn" href="/employee?view=week&week={{prev_week}}">&#8592;</a>
+      <div class="section-title">Week of {{anchor.strftime('%d %b %Y')}}</div>
+      <a class="arrow-btn" href="/employee?view=week&week={{next_week}}">&#8594;</a>
+    </div>
+    <div class="week-grid">
+      {% for day in days %}
+      <div class="day-card">
+        <div class="day-title">{{day.date.strftime('%a %d %b')}}</div>
+        {% for leave in day.leaves %}
+        <div class="leave-pill"><b>{{leave.employee}}</b><br>Leave{% if leave.reason %}<br>{{leave.reason}}{% endif %}</div>
+        {% endfor %}
+        {% for shift in day.shifts %}
+        <div class="shift-pill">{{shift.start_time}} - {{shift.end_time}}<br>{{shift.note or ''}}</div>
+        {% endfor %}
+        {% if not day.shifts and not day.leaves %}<div class="muted-text">No shifts</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="calendar-toolbar">
+      <a class="arrow-btn" href="/employee?view=month&month={{prev_month}}">&#8592;</a>
+      <div class="section-title">{{anchor.strftime('%B %Y')}}</div>
+      <a class="arrow-btn" href="/employee?view=month&month={{next_month}}">&#8594;</a>
+    </div>
+    <table class="calendar">
+      <tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>
+      {% for week in calendar_weeks %}
+      <tr>
+        {% for day in week %}
+        <td class="{% if not day.in_month %}muted{% endif %}">
+          <div class="cell-date">{{day.date.day}}</div>
+          {% for leave in day.leaves %}<div class="cell-leave"><b>{{leave.employee}}</b><br>Leave</div>{% endfor %}
+          {% for shift in day.shifts %}<div class="cell-item">{{shift.start_time}} - {{shift.end_time}}<br>{{shift.note or ''}}</div>{% endfor %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="section-title">Request Leave</div>
+      <form method="post" action="/employee/leave/add">
+        <label>Start date</label>
+        <input type="date" name="start_date" required>
+        <label>End date</label>
+        <input type="date" name="end_date" required>
+        <label>Reason</label>
+        <textarea name="reason"></textarea>
+        <button>Send Request</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="section-title">My Leave Requests</div>
+      {% for leave in leave_requests %}
+      <div class="list-row">
+        {{leave.start_date.strftime('%d %b')}} to {{leave.end_date.strftime('%d %b')}}<br>
+        {{leave.reason}}<br>
+        <span class="badge {{leave.status}}">{{leave.status}}</span>
+      </div>
+      {% else %}
+      <div class="muted-text">No leave requests</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+</body>
+</html>
