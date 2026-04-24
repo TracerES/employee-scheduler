@@ -1,0 +1,48 @@
+RENDER DEPLOYMENT GUIDE
+
+This app is ready for Render.
+
+What was added:
+- render.yaml
+- .python-version
+- PostgreSQL support
+- DATABASE_URL support
+
+How to deploy:
+
+1. Create/login to GitHub.
+2. Create a new repository called employee-scheduler.
+3. Upload all files from this folder to that GitHub repository.
+4. Go to https://dashboard.render.com/
+5. Click New +
+6. Choose Blueprint.
+7. Connect your GitHub account.
+8. Select the employee-scheduler repository.
+9. Render will read render.yaml.
+10. Click Apply.
+11. Render will create:
+   - the Python web app
+   - the PostgreSQL database
+12. Wait for deploy to finish.
+13. Open your Render URL.
+
+Default login:
+Admin:
+admin@example.com
+admin123
+
+Employee:
+jane@example.com
+employee123
+
+Build command:
+pip install -r requirements.txt
+
+Start command:
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+DATABASE_URL:
+Render supplies this automatically through render.yaml.
+
+Important:
+For real business use, upgrade the Render database plan once you are happy with the app.
